@@ -1,9 +1,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 )
 
 func root(w http.ResponseWriter, r *http.Request) {
@@ -20,18 +22,44 @@ func summary(w http.ResponseWriter, r *http.Request) {
 
 func history(w http.ResponseWriter, r *http.Request) {
 	// TODO: Next step is to fetch Current data from an API
-	fmt.Fprintf(w, "Last "+fmt.Sprint(len(entries))+" days' currency values:\n")
+	days := strings.TrimPrefix(r.URL.Path, "/history/")
+	fmt.Println("Requesting days:", days)
+	updateRates()
+	fmt.Fprintf(w, "Last "+days+" days' currency values:\n")
 
 	for i := 0; i < len(entries); i++ {
 		fmt.Fprintf(w, fmt.Sprint(print(entries[len(entries)-i-1])))
 	}
-	fmt.Println("Endpoint Hit: /summary")
+	fmt.Println("Endpoint Hit: /history")
+}
+
+func updateRates() {
+	client := http.Client{}
+	request, err := http.NewRequest("GET", "https://api.exchangerate.host/2020-04-04", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	resp, err := client.Do(request)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	// var result map[string]interface{}
+	var result map[string]entry
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	//TODO:
+	// lastUpdated = result["date"]
+	rates := result["rates"]
+
+	fmt.Println(rates.USD)
 }
 
 func handleRequests() {
 	http.HandleFunc("/", root)
 	http.HandleFunc("/summary", summary)
-	http.HandleFunc("/history", history)
+	http.HandleFunc("/history/", history)
 	log.Fatal(http.ListenAndServe(":10000", nil))
 }
 
@@ -46,6 +74,7 @@ func print(this entry) string {
 }
 
 var entries []entry
+var from, to string
 
 func main() {
 	// This is an initialization with static data
