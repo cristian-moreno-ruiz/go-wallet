@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
+
+	"github.com/go-shadow/moment"
 )
 
 func root(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +27,9 @@ func history(w http.ResponseWriter, r *http.Request) {
 	// TODO: Next step is to fetch Current data from an API
 	days := strings.TrimPrefix(r.URL.Path, "/history/")
 	fmt.Println("Requesting days:", days)
-	updateRates()
+
+	daysInt, _ := strconv.Atoi(days)
+	updateRates(daysInt)
 	fmt.Fprintf(w, "Last "+days+" days' currency values:\n")
 
 	for i := 0; i < len(entries); i++ {
@@ -33,7 +38,19 @@ func history(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Endpoint Hit: /history")
 }
 
-func updateRates() {
+func updateRates(days int) {
+	to := moment.New()
+	from := moment.New().Subtract("d", days)
+	fmt.Println("Values requested from, to", from.Format("YYYY-MM-DD"), to.Format("YYYY-MM-DD"))
+
+	// TODO: Consider if I need to fetch or already have the data
+	fmt.Println("compare TO", to.Diff(&ratesTo, "days"))
+
+	// TODO: Do request with first and last days
+
+	// TODO: Pick the values of interest from the response
+
+	// TODO: Store them, including recording which days I have
 	client := http.Client{}
 	request, err := http.NewRequest("GET", "https://api.exchangerate.host/2020-04-04", nil)
 	if err != nil {
@@ -74,7 +91,7 @@ func print(this entry) string {
 }
 
 var entries []entry
-var from, to string
+var ratesFrom, ratesTo moment.Moment //= moment.New(), moment.New()
 
 func main() {
 	// This is an initialization with static data
