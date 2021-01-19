@@ -17,60 +17,64 @@ func root(w http.ResponseWriter, r *http.Request) {
 }
 
 func summary(w http.ResponseWriter, r *http.Request) {
-	// TODO: Next step is to fetch Current data from an API
 	fmt.Fprintf(w, "This is today's currency values:\n")
-	fmt.Fprintf(w, fmt.Sprint(print(entries[len(entries)-1])))
+	fmt.Fprintf(w, fmt.Sprint(rates[moment.New().Format("YYYY-MM-DD")].print()))
 	fmt.Println("Endpoint Hit: /summary")
 }
 
 func history(w http.ResponseWriter, r *http.Request) {
-	// TODO: Next step is to fetch Current data from an API
 	days := strings.TrimPrefix(r.URL.Path, "/history/")
-	fmt.Println("Requesting days:", days)
-
 	daysInt, _ := strconv.Atoi(days)
 	updateRates(daysInt)
 	fmt.Fprintf(w, "Last "+days+" days' currency values:\n")
+	printHistory(w, daysInt)
 
-	for i := 0; i < len(entries); i++ {
-		fmt.Fprintf(w, fmt.Sprint(print(entries[len(entries)-i-1])))
-	}
 	fmt.Println("Endpoint Hit: /history")
+}
+
+func printHistory(w http.ResponseWriter, days int) {
+	to := moment.New()
+	day := moment.New().Subtract("d", days)
+	for day.Diff(to, "days") <= 0 {
+		fmt.Fprintf(w, "\n"+day.Format("YYYY-MM-DD")+":")
+		fmt.Fprintf(w, rates[day.Format("YYYY-MM-DD")].print())
+		day.Add("days", 1)
+	}
 }
 
 func updateRates(days int) {
 	to := moment.New()
 	from := moment.New().Subtract("d", days)
-	fmt.Println("Values requested from, to", from.Format("YYYY-MM-DD"), to.Format("YYYY-MM-DD"))
 
-	// TODO: Consider if I need to fetch or already have the data
-	fmt.Println("compare TO", to.Diff(&ratesTo, "days"))
+	// Check if the stored dates contain the requested dates, return if it is the case
+	if (ratesTo != nil && to.Diff(ratesTo, "days") <= 0) && (ratesFrom != nil && from.Diff(ratesFrom, "days") >= 0) {
+		return
+	}
 
-	// TODO: Do request with first and last days
-
-	// TODO: Pick the values of interest from the response
-
-	// TODO: Store them, including recording which days I have
 	client := http.Client{}
-	request, err := http.NewRequest("GET", "https://api.exchangerate.host/2020-04-04", nil)
+	request, err := http.NewRequest("GET", "https://api.exchangerate.host/timeseries?start_date="+from.Format("YYYY-MM-DD")+"&end_date="+to.Format("YYYY-MM-DD")+"&base=USD", nil)
+
+	// TODO: Better way of handling errrors??
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	resp, err := client.Do(request)
+
+	// TODO: Better way of handling errrors??
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	// var result map[string]interface{}
-	var result map[string]entry
+	var result map[string]map[string]entry
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	//TODO:
-	// lastUpdated = result["date"]
-	rates := result["rates"]
-
-	fmt.Println(rates.USD)
+	rates = result["rates"]
+	ratesTo = to
+	ratesFrom = from
+	fmt.Println("Values updated from, to", ratesFrom.Format("YYYY-MM-DD"), ratesTo.Format("YYYY-MM-DD"))
 }
 
 func handleRequests() {
@@ -86,18 +90,14 @@ type entry struct {
 	CRC float32
 }
 
-func print(this entry) string {
-	return "\nUSD: " + fmt.Sprint(this.USD) + "\n" + "EUR: " + fmt.Sprint(this.EUR) + "\n" + "CRC: " + fmt.Sprint(this.CRC) + "\n"
+func (entry entry) print() string {
+	return "\nUSD: " + fmt.Sprint(entry.USD) + "\n" + "EUR: " + fmt.Sprint(entry.EUR) + "\n" + "CRC: " + fmt.Sprint(entry.CRC) + "\n"
 }
 
-var entries []entry
-var ratesFrom, ratesTo moment.Moment //= moment.New(), moment.New()
+var ratesFrom, ratesTo *moment.Moment
+var rates map[string]entry
 
 func main() {
-	// This is an initialization with static data
-	entries = []entry{
-		entry{1.0, 0.82, 613.27},
-		entry{1.0, 0.83, 611.59},
-	}
+	updateRates(1)
 	handleRequests()
 }
