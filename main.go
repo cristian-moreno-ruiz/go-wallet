@@ -17,9 +17,8 @@ func root(w http.ResponseWriter, r *http.Request) {
 }
 
 func summary(w http.ResponseWriter, r *http.Request) {
-	// TODO: Next step is to fetch Current data from an API
 	fmt.Fprintf(w, "This is today's currency values:\n")
-	fmt.Fprintf(w, fmt.Sprint(entries[len(entries)-1].print()))
+	fmt.Fprintf(w, fmt.Sprint(rates[moment.New().Format("YYYY-MM-DD")].print()))
 	fmt.Println("Endpoint Hit: /summary")
 }
 
@@ -28,32 +27,30 @@ func history(w http.ResponseWriter, r *http.Request) {
 	daysInt, _ := strconv.Atoi(days)
 	updateRates(daysInt)
 	fmt.Fprintf(w, "Last "+days+" days' currency values:\n")
+	printHistory(w, daysInt)
 
-	for i := 0; i < len(entries); i++ {
-		fmt.Fprintf(w, fmt.Sprint(entries[len(entries)-i-1].print()))
-	}
 	fmt.Println("Endpoint Hit: /history")
+}
+
+func printHistory(w http.ResponseWriter, days int) {
+	to := moment.New()
+	day := moment.New().Subtract("d", days)
+	for day.Diff(to, "days") <= 0 {
+		fmt.Fprintf(w, "\n"+day.Format("YYYY-MM-DD")+":")
+		fmt.Fprintf(w, rates[day.Format("YYYY-MM-DD")].print())
+		day.Add("days", 1)
+	}
 }
 
 func updateRates(days int) {
 	to := moment.New()
 	from := moment.New().Subtract("d", days)
-	fmt.Println("Values requested from, to", from.Format("YYYY-MM-DD"), to.Format("YYYY-MM-DD"))
 
-	// TODO: Consider if I need to fetch or already have the data
 	// Check if the stored dates contain the requested dates, return if it is the case
-	if (ratesTo != nil && to.Diff(ratesTo, "days") <= 0) && (ratesFrom != nil && from.Diff(ratesFrom, "days") <= 0) {
+	if (ratesTo != nil && to.Diff(ratesTo, "days") <= 0) && (ratesFrom != nil && from.Diff(ratesFrom, "days") >= 0) {
 		return
 	}
 
-	fmt.Println("Need to update TO", to.GetTime())
-	fmt.Println("Need to update FROM", from.GetTime())
-
-	// TODO: Do request with first and last days
-
-	// TODO: Pick the values of interest from the response
-
-	// TODO: Store them, including recording which days I have
 	client := http.Client{}
 	request, err := http.NewRequest("GET", "https://api.exchangerate.host/timeseries?start_date="+from.Format("YYYY-MM-DD")+"&end_date="+to.Format("YYYY-MM-DD")+"&base=USD", nil)
 
@@ -71,18 +68,13 @@ func updateRates(days int) {
 		return
 	}
 
-	//var result map[string]interface{}
 	var result map[string]map[string]entry
 	json.NewDecoder(resp.Body).Decode(&result)
 
-	//TODO:
-	// lastUpdated = result["date"]
-	rates := result["rates"]
-
+	rates = result["rates"]
 	ratesTo = to
 	ratesFrom = from
-
-	fmt.Println(rates)
+	fmt.Println("Values updated from, to", ratesFrom.Format("YYYY-MM-DD"), ratesTo.Format("YYYY-MM-DD"))
 }
 
 func handleRequests() {
@@ -102,16 +94,10 @@ func (entry entry) print() string {
 	return "\nUSD: " + fmt.Sprint(entry.USD) + "\n" + "EUR: " + fmt.Sprint(entry.EUR) + "\n" + "CRC: " + fmt.Sprint(entry.CRC) + "\n"
 }
 
-var entries []entry
-var ratesFrom, ratesTo *moment.Moment //= moment.New(), moment.New()
-
+var ratesFrom, ratesTo *moment.Moment
 var rates map[string]entry
 
 func main() {
-	// This is an initialization with static data
-	entries = []entry{
-		entry{1.0, 0.82, 613.27},
-		entry{1.0, 0.83, 611.59},
-	}
+	updateRates(1)
 	handleRequests()
 }
