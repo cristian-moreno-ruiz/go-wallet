@@ -11,11 +11,14 @@ go get github.com/go-shadow/moment
 
 # Endpoints
 
-# TODOs
+# Next Steps
 
 ## Features
-- Select which currencies you want to show (maybe  default config and overridable via query string overrides)
-- Add main Crypto currencies 
-- 
+- [ ] Select which currencies you want to show (maybe  default config and overridable via query string overrides)
+- [ ] Add main Crypto currencies 
+- [ ] Add crypto trading benefit calculation for Taxes declaration
 
-## Project 
+## Project Structure
+- [ ] Refactor vendor modules (use new Go Modules feature)
+- [ ] Refactor Project structure, maybe follow https://github.com/golang-standards/project-layout
+- [ ] 
