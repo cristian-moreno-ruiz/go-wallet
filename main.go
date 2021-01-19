@@ -19,21 +19,18 @@ func root(w http.ResponseWriter, r *http.Request) {
 func summary(w http.ResponseWriter, r *http.Request) {
 	// TODO: Next step is to fetch Current data from an API
 	fmt.Fprintf(w, "This is today's currency values:\n")
-	fmt.Fprintf(w, fmt.Sprint(print(entries[len(entries)-1])))
+	fmt.Fprintf(w, fmt.Sprint(entries[len(entries)-1].print()))
 	fmt.Println("Endpoint Hit: /summary")
 }
 
 func history(w http.ResponseWriter, r *http.Request) {
-	// TODO: Next step is to fetch Current data from an API
 	days := strings.TrimPrefix(r.URL.Path, "/history/")
-	fmt.Println("Requesting days:", days)
-
 	daysInt, _ := strconv.Atoi(days)
 	updateRates(daysInt)
 	fmt.Fprintf(w, "Last "+days+" days' currency values:\n")
 
 	for i := 0; i < len(entries); i++ {
-		fmt.Fprintf(w, fmt.Sprint(print(entries[len(entries)-i-1])))
+		fmt.Fprintf(w, fmt.Sprint(entries[len(entries)-i-1].print()))
 	}
 	fmt.Println("Endpoint Hit: /history")
 }
@@ -44,7 +41,13 @@ func updateRates(days int) {
 	fmt.Println("Values requested from, to", from.Format("YYYY-MM-DD"), to.Format("YYYY-MM-DD"))
 
 	// TODO: Consider if I need to fetch or already have the data
-	fmt.Println("compare TO", to.Diff(&ratesTo, "days"))
+	// Check if the stored dates contain the requested dates, return if it is the case
+	if (ratesTo != nil && to.Diff(ratesTo, "days") <= 0) && (ratesFrom != nil && from.Diff(ratesFrom, "days") <= 0) {
+		return
+	}
+
+	fmt.Println("Need to update TO", to.GetTime())
+	fmt.Println("Need to update FROM", from.GetTime())
 
 	// TODO: Do request with first and last days
 
@@ -52,25 +55,34 @@ func updateRates(days int) {
 
 	// TODO: Store them, including recording which days I have
 	client := http.Client{}
-	request, err := http.NewRequest("GET", "https://api.exchangerate.host/2020-04-04", nil)
+	request, err := http.NewRequest("GET", "https://api.exchangerate.host/timeseries?start_date="+from.Format("YYYY-MM-DD")+"&end_date="+to.Format("YYYY-MM-DD")+"&base=USD", nil)
+
+	// TODO: Better way of handling errrors??
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
 	resp, err := client.Do(request)
+
+	// TODO: Better way of handling errrors??
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	// var result map[string]interface{}
-	var result map[string]entry
+	//var result map[string]interface{}
+	var result map[string]map[string]entry
 	json.NewDecoder(resp.Body).Decode(&result)
 
 	//TODO:
 	// lastUpdated = result["date"]
 	rates := result["rates"]
 
-	fmt.Println(rates.USD)
+	ratesTo = to
+	ratesFrom = from
+
+	fmt.Println(rates)
 }
 
 func handleRequests() {
@@ -86,12 +98,14 @@ type entry struct {
 	CRC float32
 }
 
-func print(this entry) string {
-	return "\nUSD: " + fmt.Sprint(this.USD) + "\n" + "EUR: " + fmt.Sprint(this.EUR) + "\n" + "CRC: " + fmt.Sprint(this.CRC) + "\n"
+func (entry entry) print() string {
+	return "\nUSD: " + fmt.Sprint(entry.USD) + "\n" + "EUR: " + fmt.Sprint(entry.EUR) + "\n" + "CRC: " + fmt.Sprint(entry.CRC) + "\n"
 }
 
 var entries []entry
-var ratesFrom, ratesTo moment.Moment //= moment.New(), moment.New()
+var ratesFrom, ratesTo *moment.Moment //= moment.New(), moment.New()
+
+var rates map[string]entry
 
 func main() {
 	// This is an initialization with static data
