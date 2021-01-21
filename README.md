@@ -13,12 +13,29 @@ go get github.com/go-shadow/moment
 
 # Next Steps
 
-## Features
-- [ ] Select which currencies you want to show (maybe  default config and overridable via query string overrides)
-- [ ] Add main Crypto currencies 
-- [ ] Add crypto trading benefit calculation for Taxes declaration
+Featues to be implemented, refactors and dev tools to add to the project:
 
-## Project Structure
+## Features
+- [ ] Select which currencies you want to show (maybe  default config and overridable via query string overrides?)
+- [ ] Add main Crypto currencies
+	- [X] BTC current value
+	- [ ] BTC History
+	- [ ] Add more cryptos
+- [ ] Add crypto trading benefit calculation for Taxes declaration
+	- [ ] First, it will parse a CSV with buy/sell operations
+	- [ ] It should be able to calculate the net profit
+	- [ ] Should accept a CSV in a POST request
+	- [ ] Accept some config parameters 
+- [ ] Add wallet feature to store how much I have and track buys/sells
+	- [ ] Add feature to calculate profit and taxes from the wallet
+
+## Engineering
 - [ ] Refactor vendor modules (use new Go Modules feature)
 - [ ] Refactor Project structure, maybe follow https://github.com/golang-standards/project-layout
-- [ ] 
+- [ ] Move fetcher to helpers
+- [ ] Use go modules
+- [ ] JSON responses
+- [ ] Unit tests
+	- [ ] Taxes
+	- [ ] Accounting
+- [ ] Documentation
