@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 
+	"./controllers"
+
 	"github.com/go-shadow/moment"
 )
 
@@ -19,6 +21,32 @@ func root(w http.ResponseWriter, r *http.Request) {
 func summary(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "This is today's currency values:\n")
 	fmt.Fprintf(w, fmt.Sprint(rates[moment.New().Format("YYYY-MM-DD")].print()))
+	fmt.Println("Endpoint Hit: /summary")
+}
+
+func crypto(w http.ResponseWriter, r *http.Request) {
+	client := http.Client{}
+	request, err := http.NewRequest("GET", "https://api.exchangerate.host/latest?base=BTC", nil)
+
+	// TODO: Better way of handling errrors??
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	resp, err := client.Do(request)
+
+	// TODO: Better way of handling errrors??
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var result map[string]entry
+	json.NewDecoder(resp.Body).Decode(&result)
+
+	fmt.Fprintf(w, "This is today's BTC price:\n")
+	fmt.Fprintf(w, fmt.Sprint(result["rates"].print()))
 	fmt.Println("Endpoint Hit: /summary")
 }
 
@@ -80,7 +108,9 @@ func updateRates(days int) {
 func handleRequests() {
 	http.HandleFunc("/", root)
 	http.HandleFunc("/summary", summary)
+	http.HandleFunc("/crypto", crypto)
 	http.HandleFunc("/history/", history)
+	http.HandleFunc("/taxes/", controllers.Open)
 	log.Fatal(http.ListenAndServe(":10000", nil))
 }
 
