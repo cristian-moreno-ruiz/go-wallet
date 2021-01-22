@@ -3,12 +3,18 @@ package models
 import (
 	"fmt"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 // Operations collection
 var Operations *mongo.Collection
+
+const (
+	// SELL constant
+	SELL = "SELL"
+	// BUY constant
+	BUY = "BUY"
+)
 
 // BuyOperation describes a buy operation
 type BuyOperation struct {
@@ -18,7 +24,7 @@ type BuyOperation struct {
 	FiatAmount   float64
 	OperationFee float64
 	BtcSold      float64
-	ID           primitive.ObjectID `bson:"_id"`
+	Type         string
 }
 
 // SellOperation describes a sell operation
@@ -31,6 +37,7 @@ type SellOperation struct {
 	FiatBuyCost  float64
 	FiatBuyFee   float64
 	Profit       float64
+	Type         string
 }
 
 func init() {
@@ -38,12 +45,22 @@ func init() {
 	fmt.Println("Initializing Operations collection")
 }
 
-// Create Stores the operation into the Database
+/*
+BUY OPERATIONS
+*/
+
+// Create Stores the Buy operation into the Database
 func (operation BuyOperation) Create() {
-	fmt.Println(operation)
-	Operations.InsertOne(ctx, operation)
+	operation.Type = BUY
+	Operations.InsertOne(ctx, &operation)
 }
 
-// func (this SellOperation) create() {
+/*
+SELL OPERATIONS
+*/
 
-// }
+// Create Stores the Sell operation into the Database
+func (operation SellOperation) Create() {
+	operation.Type = SELL
+	Operations.InsertOne(ctx, operation)
+}

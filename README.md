@@ -35,7 +35,7 @@ Featues to be implemented, refactors and dev tools to add to the project:
 - [ ] Compatibility with CSVs exported from exchanges directly
 
 ## Engineering
-- [ ] Refactor vendor modules (use new Go Modules feature)
+- [X] Refactor vendor modules (use new Go Modules feature)
 - [ ] Refactor Project structure, maybe follow https://github.com/golang-standards/project-layout
 - [ ] Move fetcher to helpers
 - [X] Use go modules

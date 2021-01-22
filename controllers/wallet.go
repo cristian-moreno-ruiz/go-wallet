@@ -16,19 +16,23 @@ func Import(w http.ResponseWriter, r *http.Request) {
 	csvLines, _ := csv.NewReader(file).ReadAll()
 	fmt.Println("file", csvLines)
 
+	buyOperations, sellOperations := services.ParseOperations(csvLines)
+
 	action := r.Form.Get("action")
 
 	switch action {
 	case "profit":
-		buyOperations, sellOperations := services.ParseOperations(csvLines)
-
 		sellOperations = services.CalculateProfit(buyOperations, sellOperations)
 		fmt.Fprintln(w, sellOperations)
 	case "save":
-		buyOperations, sellOperations := services.ParseOperations(csvLines)
+		sellOperations = services.CalculateProfit(buyOperations, sellOperations)
 		fmt.Fprintln(w, "saving", buyOperations, sellOperations)
 
 		for _, op := range buyOperations {
+			op.Create()
+		}
+
+		for _, op := range sellOperations {
 			op.Create()
 		}
 	}
