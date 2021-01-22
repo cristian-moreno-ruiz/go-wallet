@@ -22,12 +22,16 @@ Featues to be implemented, refactors and dev tools to add to the project:
 	- [ ] BTC History
 	- [ ] Add more cryptos
 - [ ] Add crypto trading benefit calculation for Taxes declaration
-	- [ ] First, it will parse a CSV with buy/sell operations
-	- [ ] It should be able to calculate the net profit
-	- [ ] Should accept a CSV in a POST request
+	- [X] First, it will parse a CSV with buy/sell operations
+	- [X] It should be able to calculate the net profit
+	- [X] Should accept a CSV in a POST request
 	- [ ] Accept some config parameters 
 - [ ] Add wallet feature to store how much I have and track buys/sells
 	- [ ] Add feature to calculate profit and taxes from the wallet
+	- [ ] Add feature to have multiple wallets
+- [ ] Add middlewares to handle auth/multiple users
+- [ ] How to handle multiple exchanges
+- [ ] Compatibility with CSVs exported from exchanges directly
 
 ## Engineering
 - [ ] Refactor vendor modules (use new Go Modules feature)
@@ -39,3 +43,5 @@ Featues to be implemented, refactors and dev tools to add to the project:
 	- [ ] Taxes
 	- [ ] Accounting
 - [ ] Documentation
+- [ ] Environment variables
+- [X] Split Controller and Service
