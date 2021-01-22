@@ -110,7 +110,10 @@ func handleRequests() {
 	http.HandleFunc("/summary", summary)
 	http.HandleFunc("/crypto", crypto)
 	http.HandleFunc("/history/", history)
-	http.HandleFunc("/taxes/", controllers.Open)
+	// TODO: Deprecate this route
+	http.HandleFunc("/taxes/", controllers.Handle)
+	http.HandleFunc("/wallet/upload", controllers.Import)
+
 	log.Fatal(http.ListenAndServe(":10000", nil))
 }
 
