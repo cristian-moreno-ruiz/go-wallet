@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"../services"
+	"github.com/cristian-moreno-ruiz/go-wallet/services"
 )
 
 // Import File
@@ -24,5 +24,12 @@ func Import(w http.ResponseWriter, r *http.Request) {
 
 		sellOperations = services.CalculateProfit(buyOperations, sellOperations)
 		fmt.Fprintln(w, sellOperations)
+	case "save":
+		buyOperations, sellOperations := services.ParseOperations(csvLines)
+		fmt.Fprintln(w, "saving", buyOperations, sellOperations)
+
+		for _, op := range buyOperations {
+			op.Create()
+		}
 	}
 }

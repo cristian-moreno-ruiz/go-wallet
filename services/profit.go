@@ -2,32 +2,34 @@ package services
 
 import (
 	"fmt"
+
+	"github.com/cristian-moreno-ruiz/go-wallet/models"
 )
 
-// BuyOperation describes a buy operation
-type BuyOperation struct {
-	Date         string
-	BtcAmount    float64
-	BtcPrice     float64
-	FiatAmount   float64
-	OperationFee float64
-	BtcSold      float64
-}
+// // BuyOperation describes a buy operation
+// type BuyOperation struct {
+// 	Date         string
+// 	BtcAmount    float64
+// 	BtcPrice     float64
+// 	FiatAmount   float64
+// 	OperationFee float64
+// 	BtcSold      float64
+// }
 
-// SellOperation describes a sell operation
-type SellOperation struct {
-	Date         string
-	BtcAmount    float64
-	BtcPrice     float64
-	FiatAmount   float64
-	OperationFee float64
-	FiatBuyCost  float64
-	FiatBuyFee   float64
-	Profit       float64
-}
+// // SellOperation describes a sell operation
+// type SellOperation struct {
+// 	Date         string
+// 	BtcAmount    float64
+// 	BtcPrice     float64
+// 	FiatAmount   float64
+// 	OperationFee float64
+// 	FiatBuyCost  float64
+// 	FiatBuyFee   float64
+// 	Profit       float64
+// }
 
 // CalculateProfit Calculates the profit of a passed in combination off buys and sells
-func CalculateProfit(buyOperations []BuyOperation, sellOperations []SellOperation) []SellOperation {
+func CalculateProfit(buyOperations []models.BuyOperation, sellOperations []models.SellOperation) []models.SellOperation {
 	// fmt.Println("       Date          BTC Amt   BTC Price   Fiat Sell  Fee   FIFO Cost   FIFO FEE   Net Profit")
 	for i := range sellOperations {
 		currentSellOp := &sellOperations[i]
