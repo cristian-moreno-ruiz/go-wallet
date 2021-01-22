@@ -7,7 +7,8 @@ This is a wallet API made in GO.
 ````
 go get github.com/go-shadow/moment
 ````
-2. Run `air main.go`.
+2. Run `docker-compose up -d mongo` to start the database
+3. Run `air main.go`.
 
 # Endpoints
 
@@ -37,7 +38,7 @@ Featues to be implemented, refactors and dev tools to add to the project:
 - [ ] Refactor vendor modules (use new Go Modules feature)
 - [ ] Refactor Project structure, maybe follow https://github.com/golang-standards/project-layout
 - [ ] Move fetcher to helpers
-- [ ] Use go modules
+- [X] Use go modules
 - [ ] JSON responses
 - [ ] Unit tests
 	- [ ] Taxes
