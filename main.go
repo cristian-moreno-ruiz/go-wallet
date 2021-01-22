@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	"./controllers"
+	"github.com/cristian-moreno-ruiz/go-wallet/controllers"
 
 	"github.com/go-shadow/moment"
 )

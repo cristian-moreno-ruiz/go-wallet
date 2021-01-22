@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"../services"
-	"../utils"
+	"github.com/cristian-moreno-ruiz/go-wallet/services"
+	"github.com/cristian-moreno-ruiz/go-wallet/utils"
 )
 
 // TODO: Taxes was never a proper name, this will be deprecated, and we will keep this to do it through cmd
