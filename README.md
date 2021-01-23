@@ -46,3 +46,4 @@ Featues to be implemented, refactors and dev tools to add to the project:
 - [ ] Documentation
 - [ ] Environment variables
 - [X] Split Controller and Service
+- [ ] It was maybe a bad idea to mix buy/sell operations in the same table but with different types...
