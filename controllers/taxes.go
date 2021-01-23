@@ -17,6 +17,6 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 
 	buyOperations, sellOperations := services.ParseOperations(csvLines)
 
-	sellOperations = services.CalculateProfit(buyOperations, sellOperations)
+	_, sellOperations = services.CalculateProfit(buyOperations, sellOperations)
 	fmt.Fprintln(w, sellOperations)
 }

@@ -24,10 +24,10 @@ func ImportOperations(w http.ResponseWriter, r *http.Request) {
 
 	switch action {
 	case "profit":
-		sellOperations = services.CalculateProfit(buyOperations, sellOperations)
+		_, sellOperations = services.CalculateProfit(buyOperations, sellOperations)
 		fmt.Fprintln(w, sellOperations)
 	case "save":
-		sellOperations = services.CalculateProfit(buyOperations, sellOperations)
+		buyOperations, sellOperations = services.CalculateProfit(buyOperations, sellOperations)
 		fmt.Fprintln(w, "saving", buyOperations, sellOperations)
 
 		for _, op := range buyOperations {

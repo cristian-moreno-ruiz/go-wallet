@@ -7,7 +7,7 @@ import (
 )
 
 // CalculateProfit Calculates the profit of a passed in combination off buys and sells
-func CalculateProfit(buyOperations []models.BuyOperation, sellOperations []models.SellOperation) []models.SellOperation {
+func CalculateProfit(buyOperations []models.BuyOperation, sellOperations []models.SellOperation) ([]models.BuyOperation, []models.SellOperation) {
 	// fmt.Println("       Date          BTC Amt   BTC Price   Fiat Sell  Fee   FIFO Cost   FIFO FEE   Net Profit")
 	for i := range sellOperations {
 		currentSellOp := &sellOperations[i]
@@ -34,18 +34,17 @@ func CalculateProfit(buyOperations []models.BuyOperation, sellOperations []model
 					currentSellOp.FiatBuyFee = currentSellOp.FiatBuyFee + (currentSellOp.BtcAmount-bought)*buyOperations[buyOp].OperationFee/buyOperations[buyOp].BtcAmount
 
 					// Mark the amount used sold and consider its buying done
-					bought = bought + currentSellOp.BtcAmount - bought
 					buyOperations[buyOp].BtcSold = buyOperations[buyOp].BtcSold + currentSellOp.BtcAmount - bought
+					bought = bought + currentSellOp.BtcAmount - bought
 				} else {
 					// Maybe should use Max[currentSellOp.fiatBuyCost, btcRemaining*buyOperations[buyOp].btcPrice]
 					// In this way, it would be in my favor tax-wise
 					currentSellOp.FiatBuyCost = currentSellOp.FiatBuyCost + btcRemaining*buyOperations[buyOp].BtcPrice
 
-					// This should mark the buy operation as completely sold
-					buyOperations[buyOp].BtcSold = buyOperations[buyOp].BtcSold + btcRemaining
-
 					// Compute Fee
 					currentSellOp.FiatBuyFee = currentSellOp.FiatBuyFee + buyOperations[buyOp].OperationFee
+					// This should mark the buy operation as completely sold
+					buyOperations[buyOp].BtcSold = buyOperations[buyOp].BtcSold + btcRemaining
 
 					bought = bought + btcRemaining
 				}
@@ -57,5 +56,5 @@ func CalculateProfit(buyOperations []models.BuyOperation, sellOperations []model
 
 	fmt.Println("finished")
 	fmt.Println(sellOperations)
-	return sellOperations
+	return buyOperations, sellOperations
 }
